@@ -1,0 +1,10 @@
+# Keep private working material in these explicit local-only locations.
+/private/
+/local-only/
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
