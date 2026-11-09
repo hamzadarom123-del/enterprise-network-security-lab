@@ -8,7 +8,7 @@ This baseline was reconstructed on 2026-11-09 from the earlier learning-session 
 
 | Role | Platform | Reported purpose | Still to confirm |
 | --- | --- | --- | --- |
-| Physical switch | Cisco Catalyst C9200CX | Management VLAN experiment | Exact SKU, IOS XE version, port map and VLAN membership |
+| Physical switch | Cisco Catalyst C9200CX | Management VLAN experiment | Exact SKU, port map and VLAN membership; IOS XE 17.12.3 (Dublin) confirmed from supplied show version excerpt |
 | Hypervisor | Proxmox VE | Virtual lab hosting | Version, physical uplinks, bridges, VLAN awareness and vNIC assignments |
 | LAN endpoint | Ubuntu VM | Initiates firewall tests | Version, prefix, gateway, routes and local firewall |
 | Firewall | OPNsense VM | LAN/WAN routing and filtering | Version, interface assignments, rules, NAT and gateway settings |
