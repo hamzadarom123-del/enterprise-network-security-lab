@@ -1,49 +1,57 @@
 # Milestones
 
-These are proposed repository milestones, not GitHub releases or completed work. Dates and completion percentages are intentionally omitted until evidence supports them.
+Milestones describe historical progress and remaining evidence separately. They are not published releases, and no completion percentage or guaranteed date is asserted.
 
 ## v0.1.0 — Network Foundation & Firewall Fundamentals
 
-Status: documentation in progress; experiments reported, evidence pending.
+**Status: historical practical work documented; evidence packaging incomplete.**
 
-- [ ] Record platform versions and sanitized component inventory.
-- [ ] Confirm switch management VLAN and management reachability.
-- [ ] Map Proxmox bridges, physical uplinks and VM vNICs.
-- [ ] Record Ubuntu addressing, default routes and WAN-side return path.
-- [ ] Validate a new LAN-initiated flow and its stateful return traffic.
-- [ ] Validate a blocked new WAN-initiated flow and an explicit permitted comparison.
-- [ ] Attach sanitized logs or captures with expected and observed outcomes.
-- [ ] Document rollback and limitations; review all artifacts for publication.
+Completed checkboxes below mean the stated documentation task is complete, not that every historical claim has been independently retested.
 
-Completion requires the linked [lab reports](labs/README.md) to contain reproducible steps and actual results. A ping or screenshot alone does not prove the full architecture.
+- [x] Record supplied Cisco, bridge, VM, addressing and routing inventory.
+- [x] Record Cisco management and historical administrative/access-port protections.
+- [x] Document VM 101 VLAN-tag startup incident and reported fix.
+- [x] Document reported 10/10 LAN-to-WAN ping with source NAT disabled.
+- [x] Explain stateful ICMP, ingress direction and scoped logged block.
+- [x] Record reported WAN IN pass experiment with its evidence limitation.
+- [x] Document local SSH forwarding and temporary vmbr1 host addressing.
+- [ ] Archive available original, sanitized screenshots/logs and link each to its claim.
+- [ ] Resolve VM 102 final deployment and temporary address cleanup from existing records.
+- [ ] Record missing Proxmox/Ubuntu versions, exact switch SKU and full relevant policy.
+- [ ] Complete owner publication review and release acceptance.
 
-## v0.2.0 — Professional Firewall Policies
+Historical source recovery comes first; these gaps do not require repeating physical switch configuration just to document past work. See the [evidence register](evidence.md).
 
-Status: planned; corresponds to the next policy-design lesson.
+## v0.2.0 — Lesson 18: Professional Firewall Policies
 
-- [ ] Define authorized sources, destinations and services using aliases.
-- [ ] Build and justify a least-privilege policy matrix.
-- [ ] Test allowed management access and denied unauthorized access.
+**Status: PLANNED; next practical activity.**
+
+- [ ] Define authorized source/destination/service aliases.
+- [ ] Design a least-privilege policy matrix.
+- [ ] Test authorized management access and denied unauthorized access.
 - [ ] Evaluate rule order and existing-state behavior.
-- [ ] Document logs, rollback and management lockout prevention.
+- [ ] Document actual logs, management-lockout prevention and rollback.
+
+The existing [Lab 04 plan](labs/04-firewall-policy.md) is retained as planned. Previous ICMP exercises do not mean Lesson 18 is complete.
 
 ## v0.3.0 — Physical Switching and Segmentation
 
-Status: planned.
+**Status: PLANNED.** VLANs 20 USERS, 30 SERVERS and 40 DMZ were created historically. The Proxmox physical uplink remains documented as access VLAN 10.
 
-- [ ] Review access/trunk design and bridge tagging behavior.
-- [ ] Integrate Cisco switching with the virtual firewall using a verified port map.
+- [ ] Design the physical access/trunk and virtual bridge tagging model.
+- [ ] Plan console access and rollback before changing the uplink.
+- [ ] Implement and evidence Cisco–OPNsense physical VLAN integration.
 - [ ] Test permitted inter-segment traffic and denied lateral traffic.
-- [ ] Prove the intended path with captures and counters.
+- [ ] Establish the actual traffic path using reviewed artifacts.
 
 ## v1.0 — Documented Enterprise Lab Baseline
 
-Status: proposed scope, subject to owner review.
+**Status: proposed scope.**
 
-- [ ] Complete the preceding milestones with evidence.
+- [ ] Complete preceding milestones and evidence review.
 - [ ] Document required infrastructure services and management controls.
-- [ ] Demonstrate configuration backup and a controlled recovery exercise.
-- [ ] Provide an architecture, policy matrix and troubleshooting case study consistent with the tested environment.
-- [ ] Review residual risks and publish an accurate release summary.
+- [ ] Demonstrate configuration backup and controlled recovery.
+- [ ] Align architecture, policy matrix and troubleshooting reports with the tested baseline.
+- [ ] Review limitations and approve an accurate release summary.
 
-Fortinet practice, VPN, high availability, IDS/IPS, cloud and automation remain optional later work. They are not represented as deployed capabilities. Certification requirements should be checked with the vendor when scheduling study or exams.
+Fortinet study can complement later work, but deployed FortiGate, VPN, enterprise HA, production FH connectivity and completed future certifications are not part of the current claims. Check certification requirements with the vendor when planning exams.

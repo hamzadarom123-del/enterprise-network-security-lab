@@ -1,54 +1,79 @@
 # Architecture
 
-## Scope and confidence
+## Scope and provenance
 
-This baseline was reconstructed on 2026-11-09 from the earlier learning-session summary. No device access, configuration exports, packet captures or screenshots were available for independent verification. Addresses and VM identifiers from the private summary are deliberately omitted.
+Historical state reconstructed from the owner's lab audit of repository commit `89068b1`, supplied on 2026-11-09. No live device inspection was performed. The supplied Cisco `show version` excerpt directly supports IOS XE 17.12.03 / 17.12.3 (Dublin). OPNsense 26.7 is attributed to a historical console screenshot described by the owner; that image is not available in this repository.
 
-## Component inventory
+The earlier documentation left addresses and mappings unknown because it lacked this detailed audit. Those gaps are now filled as **historical reported configuration**, not promoted to independently verified current settings. See the [evidence register](evidence.md).
 
-| Role | Platform | Reported purpose | Still to confirm |
-| --- | --- | --- | --- |
-| Physical switch | Cisco Catalyst C9200CX | Management VLAN experiment | Exact SKU, port map and VLAN membership; IOS XE 17.12.3 (Dublin) confirmed from supplied show version excerpt |
-| Hypervisor | Proxmox VE | Virtual lab hosting | Version, physical uplinks, bridges, VLAN awareness and vNIC assignments |
-| LAN endpoint | Ubuntu VM | Initiates firewall tests | Version, prefix, gateway, routes and local firewall |
-| Firewall | OPNsense VM | LAN/WAN routing and filtering | Version, interface assignments, rules, NAT and gateway settings |
-| WAN endpoint | Ubuntu VM | Simulates an external-side host | Prefix, return route, services and local firewall |
+**Anonymization:** every infrastructure address and hostname below is a fictional example, not an actual deployed value. Management is mapped to RFC 5737 TEST-NET-1, LAN to TEST-NET-2 and simulated WAN to TEST-NET-3. Prefix lengths, host relationships, routes, device roles and VLAN IDs are preserved. Documentation ranges are not deployable public network assignments.
 
-## Logical topology
+## Historical current-state diagram
 
 ```mermaid
 flowchart TB
-    C[Cisco C9200CX - management experiment]
-    P[Proxmox VE - virtualization environment]
-    C -. Physical uplink and VLAN mapping unconfirmed .- P
-    subgraph V[Reported virtual traffic path - bridge mapping unconfirmed]
-        L[Ubuntu LAN endpoint] --- FL[OPNsense LAN]
-        FL --- FW[OPNsense WAN]
-        FW --- W[Ubuntu simulated WAN endpoint]
+    PC["Windows admin · 192.0.2.10/24"]
+    SW["C9200CX · IOS XE 17.12.3<br/>SVI VLAN 10 · 192.0.2.2/24"]
+    PC ---|"Gi1/0/2 · access VLAN 10"| SW
+    SW ---|"Gi1/0/1 · access VLAN 10<br/>Lenovo USB-Ethernet"| B0
+    subgraph P["hypervisor-example · Proxmox VE"]
+        B0["vmbr0 · 192.0.2.50/24"]
+        B1["vmbr1 · no physical uplink<br/>VLAN-aware disabled<br/>normally no host IP"]
+        U1["101 · lan-client-example<br/>198.51.100.10/24"] ---|"VirtIO · untagged"| B1
+        U2["102 · lan-client2-example<br/>198.51.100.20/24<br/>deployment unconfirmed"] -.-> B1
+        B1 ---|"LAN · vtnet1<br/>198.51.100.1/24"| F["200 · firewall-example<br/>OPNsense 26.7"]
+        F ---|"WAN · vtnet0<br/>203.0.113.2/30"| B2["vmbr2 · no physical uplink"]
+        B2 --- U3["103 · wan-test-example<br/>203.0.113.1/30"]
+        B0 -. "SSH server opens target TCP connection<br/>temporary vmbr1 address 198.51.100.254/24" .-> B1
     end
-    P -. Hosts virtual lab roles .- V
+    VL["VLAN 20 USERS · 30 SERVERS · 40 DMZ<br/>created; physical trunk integration planned"] -. "Switch inventory only" .-> SW
 ```
 
-Solid links represent the reported logical path only. The two OPNsense interface nodes belong to one firewall VM. Dashed links are relationships awaiting inventory; they are not evidence of a configured trunk.
+Dashed links identify an uncertain VM, temporary application forwarding or inventory notes; they are not physical trunks. No general routing path between vmbr0 and vmbr1 is asserted.
 
-## Boundaries and design decisions
+## Addressing and bridge inventory
 
-- Keep the simulated WAN isolated from live upstream networks while testing permissive policies.
-- Confirm that no bridge or second endpoint interface bypasses OPNsense. A diagram alone cannot prove isolation.
-- Maintain a separate, recoverable management path before changing bridges, switch VLANs or firewall administration rules.
-- A bridge provides Layer 2 connectivity; routing, filtering and NAT are separate functions. Do not infer a NAT requirement from successful routing.
-- For routed tests without source NAT, the destination must have a return route to the source subnet. If NAT is used, record the translation and test that behavior explicitly.
+The roles and relationships below reflect owner-reported historical settings. All addresses and hostnames are anonymized RFC 5737 examples; original values and the mapping remain in private local records outside Git.
 
-## Sanitized addressing convention
+| Component / interface | Address | Attachment and role |
+| --- | --- | --- |
+| Cisco management SVI VLAN 10 | 192.0.2.2/24 | Management segment |
+| Windows administrative PC | 192.0.2.10/24 | Gi1/0/2, access VLAN 10 |
+| hypervisor-example management, vmbr0 | 192.0.2.50/24 | Lenovo USB-Ethernet to Gi1/0/1, access VLAN 10 |
+| vmbr1 host interface, baseline | No host IP initially | Isolated LAN bridge; no physical uplink; VLAN-aware disabled |
+| vmbr1 host interface, administration experiment | 198.51.100.254/24 temporarily | Host-originated connection to OPNsense GUI; removal not evidenced |
+| vmbr2 host interface | Host IP not supplied | Isolated simulated-WAN bridge; no physical uplink |
+| VM 101 lan-client-example | 198.51.100.10/24 | VirtIO on vmbr1; gateway 198.51.100.1 for remote networks |
+| VM 102 lan-client2-example | 198.51.100.20/24 intended/reported | vmbr1; planned/configured during training, final deployment unconfirmed |
+| VM 200 firewall-example, LAN vtnet1 | 198.51.100.1/24 | VirtIO on vmbr1 |
+| VM 200 firewall-example, WAN vtnet0 | 203.0.113.2/30 | VirtIO on vmbr2 |
+| VM 103 wan-test-example | 203.0.113.1/30 | vmbr2; simulated upstream endpoint |
 
-Public reports use `LAN_TEST_HOST`, `FW_LAN`, `FW_WAN`, `WAN_TEST_HOST` and `MGMT_HOST`. These are role labels, not commands or deployable addresses. Keep the real mapping outside this repository. Record prefix lengths and routes in a reviewed, sanitized inventory before publishing a reproducible numeric example.
+Management default gateways, physical host NIC identifier, vmbr2 VLAN-awareness setting and other unspecified settings remain unconfirmed.
 
-## Inventory required before integration
+| VM | Supplied resource / platform detail |
+| --- | --- |
+| 101 | Ubuntu Server; 2 vCPU, 2 GiB RAM, 20 GiB disk; exact Ubuntu release not supplied |
+| 102 | Ubuntu client role; resource allocation and final deployment status unconfirmed |
+| 103 | Ubuntu WAN test role; release and resource allocation not supplied |
+| 200 | OPNsense 26.7 per historical screenshot reference; two VirtIO interfaces; resources not supplied |
 
-1. Map each VM vNIC to a bridge and each bridge to its uplink, if any.
-2. Record switch access/trunk mode, allowed VLANs and untagged/native VLAN behavior.
-3. Identify which device routes each segment; avoid assuming switch Layer 3 capabilities or licensing.
-4. Record firewall interface roles, default gateway, return routes and NAT mode.
-5. Verify management reachability and rollback access before applying changes.
+## Forward and return routing
 
-Reference: [Proxmox VE network configuration](https://pve.proxmox.com/wiki/Network_Configuration). Exact settings must be checked against the installed release.
+- LAN endpoint sends remote-subnet traffic to `198.51.100.1`.
+- OPNsense has LAN `198.51.100.0/24` and WAN `203.0.113.0/30` directly attached.
+- VM 103 has a return route for `198.51.100.0/24` via `203.0.113.2`.
+- Source NAT was disabled for the pure-routing experiment. A LAN-originated request arriving at the WAN test host therefore retains the LAN source address; the return route is essential.
+- WAN private-network blocking was disabled in the original isolated RFC1918 simulation. The public WAN addresses are now TEST-NET examples, not RFC1918 addresses; they preserve topology without changing the historical account of that setting. This is not a recommendation for an Internet-facing WAN.
+
+## Layer 2 boundaries
+
+The Cisco uplink carries access VLAN 10 only. VLANs 20 USERS, 30 SERVERS and 40 DMZ were created, but no 802.1Q trunk or physical Cisco–OPNsense inter-VLAN integration is documented. The example IP subnet `198.51.100.0/24` on vmbr1 does not itself make the bridge a tagged VLAN 20 network. IP numbering and Ethernet VLAN tagging are separate.
+
+vmbr1 and vmbr2 have no physical uplinks in the reported design. The temporary host address on vmbr1 creates host access to that segment without requiring forwarding between bridges. Its removal after administration remains an evidence gap.
+
+## Remaining inventory gaps
+
+Exact switch SKU; Proxmox and Ubuntu versions; management gateways; complete ruleset and VTY source list; endpoint firewall configuration; present-day configuration and temporary-address cleanup. Historical documentation does not require repeating physical switch configuration.
+
+Reference: [Proxmox VE network configuration](https://pve.proxmox.com/wiki/Network_Configuration).
